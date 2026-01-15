@@ -1,0 +1,82 @@
+{
+    "version": "1.0",
+    "updated": "2025-11-16",
+    "mappings": [
+        {
+            "code": "HISPANIC/LATINO",
+            "name_en": "HISPANIC/LATINO",
+            "lists": [
+                "HISPANIC/LATINO",
+                "HISPANIC OR LATINO",
+                "HISPANIC/LATINO - PUERTO RICAN",
+                "HISPANIC/LATINO - DOMINICAN",
+                "HISPANIC/LATINO - GUATEMALAN",
+                "HISPANIC/LATINO - SALVADORAN",
+                "HISPANIC/LATINO - CUBAN",
+                "HISPANIC/LATINO - MEXICAN",
+                "HISPANIC/LATINO - CENTRAL AMERICAN (OTHER)",
+                "HISPANIC/LATINO - COLOMBIAN",
+                "HISPANIC/LATINO - HONDURAN",
+                "PUERTO RICAN",
+                "DOMINICAN",
+                "GUATEMALAN",
+                "SALVADORAN",
+                "CUBAN",
+                "MEXICAN",
+                "CENTRAL AMERICAN (OTHER)",
+                "COLOMBIAN",
+                "HONDURAN",
+                "HISPANIC",
+                "LATINO",
+                "LATINA",
+                "LATINX"
+            ]
+        },
+        {
+            "code": "WHITE",
+            "name_en": "WHITE",
+            "lists": [
+                "WHITE",
+                "WHITE - RUSSIAN",
+                "WHITE - OTHER EUROPEAN",
+                "WHITE - BRAZILIAN",
+                "WHITE - EASTERN EUROPEAN"
+            ]
+        },
+        {
+            "code": "ASIAN",
+            "name_en": "ASIAN",
+            "lists": [
+                "ASIAN",
+                "ASIAN - CHINESE",
+                "ASIAN - ASIAN INDIAN",
+                "ASIAN - VIETNAMESE",
+                "ASIAN - FILIPINO",
+                "ASIAN - OTHER",
+                "ASIAN - KOREAN",
+                "ASIAN - CAMBODIAN",
+                "ASIAN - JAPANESE",
+                "ASIAN - THAI"
+            ]
+        },
+        {
+            "code": "BLACK",
+            "name_en": "BLACK",
+            "lists": [
+                "BLACK",
+                "BLACK/AFRICAN AMERICAN",
+                "AFRICAN AMERICAN",
+                "BLACK/AFRICAN",
+                "BLACK/CAPE VERDEAN",
+                "BLACK/HAITIAN",
+                "BLACK - AFRICAN AMERICAN",
+                "BLACK - CAPE VERDEAN",
+                "BLACK - HAITIAN",
+                "AFRO-CARIBBEAN",
+                "CARIBBEAN BLACK",
+                "AFRICAN",
+                "BLACK - OTHER"
+            ]
+        }
+    ]
+}
