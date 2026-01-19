@@ -97,7 +97,6 @@ processed_data/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-*.ipynb
 
 # 테스트 및 커버리지
 .coverage
