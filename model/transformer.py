@@ -8,6 +8,11 @@ from evalutate import evaluate_model
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from torch.utils.data import DataLoader, TensorDataset
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=torch.jit.TracerWarning)
+
+
 # helper function
 def extract_values(df, num_cols, cat_cols, target_col):
     X_num = df[num_cols].values
@@ -231,3 +236,26 @@ print(report_df)
 # (선택) 결과를 파일로 저장
 report_df.to_csv("fairness_report.csv")
 print("\n리포트가 'fairness_report.csv'로 저장되었습니다.")
+
+# === ONNX export ===
+model.eval()
+model_cpu = model.to("cpu")
+
+# 더미 입력 (배치 1)
+dummy_x_num = torch.zeros(1, X_num_train.shape[1], dtype=torch.float32)
+dummy_x_cat = torch.zeros(1, X_cat_train.shape[1], dtype=torch.long)
+
+torch.onnx.export(
+    model_cpu,
+    (dummy_x_num, dummy_x_cat),
+    "model_viz.onnx",
+    input_names=["x_num", "x_cat"],
+    output_names=["output"],
+    opset_version=17,
+    dynamic_axes={
+        "x_num": {0: "batch"},
+        "x_cat": {0: "batch"},
+        "output": {0: "batch"},
+    },
+)
+print("model_viz.onnx 저장 완료! https://netron.app 에서 열어보세요.")
