@@ -83,6 +83,9 @@ train_dl = DataLoader(TensorDataset(X_num_train, X_cat_train, y_train), batch_si
 val_dl   = DataLoader(TensorDataset(X_num_val, X_cat_val, y_val), batch_size=batch_size, shuffle=False)
 test_dl  = DataLoader(TensorDataset(X_num_test, X_cat_test, y_test), batch_size=batch_size, shuffle=False)
 
+# Embedding extraction needs stable order
+train_eval_dl = DataLoader(TensorDataset(X_num_train, X_cat_train, y_train), batch_size=batch_size, shuffle=False)
+
 # ==========================================
 # 4. 모델 정의 및 학습
 # ==========================================
@@ -171,6 +174,58 @@ if best_model_state is not None:
     model.load_state_dict(best_model_state)
     print("\nBest Model weights loaded for Final Testing.")
 
+# ==========================================
+# 임베딩 추출 (분류 헤드 직전 representation)
+# ==========================================
+def extract_head_embeddings(model, dl, device):
+    model.eval()
+    emb_list = []
+    y_list = []
+
+    def hook(module, inp, out):
+        emb_list.append(inp[0].detach().cpu())
+
+    h = model.head.register_forward_hook(hook)
+
+    with torch.no_grad():
+        for x_n, x_c, y in dl:
+            x_n, x_c, y = x_n.to(device), x_c.to(device), y.to(device)
+            _ = model(x_n, x_c)
+            y_list.append(y.cpu())
+
+    h.remove()
+
+    emb = torch.cat(emb_list).numpy()
+    y = torch.cat(y_list).numpy()
+    return emb, y
+
+train_emb, train_y = extract_head_embeddings(model, train_eval_dl, device)
+val_emb, val_y = extract_head_embeddings(model, val_dl, device)
+test_emb, test_y = extract_head_embeddings(model, test_dl, device)
+
+np.savez(
+    "train_embeddings.npz",
+    emb=train_emb,
+    target=train_y,
+    subject_id=train_df["SUBJECT_ID"].values,
+    ethnicity=train_df["ETHNICITY"].values,
+)
+np.savez(
+    "val_embeddings.npz",
+    emb=val_emb,
+    target=val_y,
+    subject_id=val_df["SUBJECT_ID"].values,
+    ethnicity=val_df["ETHNICITY"].values,
+)
+np.savez(
+    "test_embeddings.npz",
+    emb=test_emb,
+    target=test_y,
+    subject_id=test_df["SUBJECT_ID"].values,
+    ethnicity=test_df["ETHNICITY"].values,
+)
+print("Saved embeddings: train_embeddings.npz, val_embeddings.npz, test_embeddings.npz")
+
 # --- [Final Test] ---
 test_metrics = evaluate_model(model, test_dl, criterion, device)
 
@@ -179,7 +234,6 @@ print(f"AUROC: {test_metrics['auroc']:.4f} | "
       f"AUPRC: {test_metrics['auprc']:.4f}"
       )
 
-import pandas as pd
 import torch.nn.functional as F
 
 # 1. 모델을 평가 모드로 전환
@@ -237,25 +291,25 @@ print(report_df)
 report_df.to_csv("fairness_report.csv")
 print("\n리포트가 'fairness_report.csv'로 저장되었습니다.")
 
-# === ONNX export ===
-model.eval()
-model_cpu = model.to("cpu")
+# # === ONNX export ===
+# model.eval()
+# model_cpu = model.to("cpu")
 
-# 더미 입력 (배치 1)
-dummy_x_num = torch.zeros(1, X_num_train.shape[1], dtype=torch.float32)
-dummy_x_cat = torch.zeros(1, X_cat_train.shape[1], dtype=torch.long)
+# # 더미 입력 (배치 1)
+# dummy_x_num = torch.zeros(1, X_num_train.shape[1], dtype=torch.float32)
+# dummy_x_cat = torch.zeros(1, X_cat_train.shape[1], dtype=torch.long)
 
-torch.onnx.export(
-    model_cpu,
-    (dummy_x_num, dummy_x_cat),
-    "model_viz.onnx",
-    input_names=["x_num", "x_cat"],
-    output_names=["output"],
-    opset_version=17,
-    dynamic_axes={
-        "x_num": {0: "batch"},
-        "x_cat": {0: "batch"},
-        "output": {0: "batch"},
-    },
-)
-print("model_viz.onnx 저장 완료! https://netron.app 에서 열어보세요.")
+# torch.onnx.export(
+#     model_cpu,
+#     (dummy_x_num, dummy_x_cat),
+#     "model_viz.onnx",
+#     input_names=["x_num", "x_cat"],
+#     output_names=["output"],
+#     opset_version=17,
+#     dynamic_axes={
+#         "x_num": {0: "batch"},
+#         "x_cat": {0: "batch"},
+#         "output": {0: "batch"},
+#     },
+# )
+# print("model_viz.onnx 저장 완료! https://netron.app 에서 열어보세요.")
